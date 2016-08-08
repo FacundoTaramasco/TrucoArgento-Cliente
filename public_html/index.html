@@ -1,21 +1,46 @@
 <!DOCTYPE html>
-<!--
-To change this license header, choose License Headers in Project Properties.
-To change this template file, choose Tools | Templates
-and open the template in the editor.
--->
 <html>
     <head>
-        <title>TODO supply a title</title>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <script type="text/javascript">
+            //notar el protocolo.. es 'ws' y no 'http'
+            var wsUri = "ws://localhost:8080/TrucoArgento-Servidor/TrucoArgento";
+            
+            var websocket = new WebSocket(wsUri); //creamos el socket
+            
+            websocket.onopen = function(evt) { //manejamos los eventos...
+                log("Conectado..."); //... y aparecerá en la pantalla
+            };
+            
+            websocket.onmessage = function(evt) { // cuando se recibe un mensaje
+                log("Mensaje recibido:" + evt.data);
+            };
+            
+            websocket.onerror = function(evt) {
+                log("oho!.. error:" + evt.data);
+            };
+ 
+            function enviarMensaje() {
+                websocket.send(mensajeTXT.value);
+                log("Enviando:" + mensajeTXT.value);
+            }
+            function log(mensaje) { //aqui mostrará el LOG de lo que está haciendo el WebSocket
+                var logDiv = document.getElementById("log");
+                logDiv.innerHTML += (mensaje + '<br/>');
+            }
+ 
+        </script>
     </head>
     <body>
-        <div>TODO write content</div>
-        
-        
-        
-        
-        
+        <h1>WebSocket</h1>
+        <form >
+            <label for="mensajeTXT">Mensaje:</label>
+            <input id='mensajeTXT' name='mensajeTXT'/><br/>
+            <button type="button" onclick="enviarMensaje()">Enviar</button>
+        </form>
+        <div id="log">
+ 
+        </div>
     </body>
 </html>
