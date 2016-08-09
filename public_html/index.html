@@ -4,40 +4,55 @@
         <title></title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <script type="text/javascript">
-            //notar el protocolo.. es 'ws' y no 'http'
-            var wsUri = "ws://localhost:8080/TrucoArgento-Servidor/TrucoArgento";
             
-            var websocket = new WebSocket(wsUri); //creamos el socket
-            
-            websocket.onopen = function(evt) { //manejamos los eventos...
-                log("Conectado..."); //... y aparecerá en la pantalla
-            };
-            
-            websocket.onmessage = function(evt) { // cuando se recibe un mensaje
-                log("Mensaje recibido:" + evt.data);
-            };
-            
-            websocket.onerror = function(evt) {
-                log("oho!.. error:" + evt.data);
-            };
- 
-            function enviarMensaje() {
-                websocket.send(mensajeTXT.value);
-                log("Enviando:" + mensajeTXT.value);
-            }
-            function log(mensaje) { //aqui mostrará el LOG de lo que está haciendo el WebSocket
-                var logDiv = document.getElementById("log");
-                logDiv.innerHTML += (mensaje + '<br/>');
-            }
- 
+            function conectar() {
+                var wsUri = "ws://localhost:8080/TrucoArgento-Servidor/TrucoArgento";
+
+                var websocket = new WebSocket(wsUri);
+
+                websocket.onopen = function(evt) {
+                    log("Conectado...");
+                    var json = {
+                        accion : "entraJuego",
+                        nombre : nombre.value
+                    };
+                    websocket.send(JSON.stringify(json));
+                    console.log("enviando : " + json)
+                };
+
+                websocket.onmessage = function(event) {
+                    
+                    var jsonData = JSON.parse(event.data);
+                    
+                    if (jsonData.accion === "espera") {
+                        log(jsonData.mensaje);
+                    }
+                    
+                    if (jsonData.accion === "a_jugar") {
+                        window.location = jsonData.href;
+                    } 
+                    
+                    
+                    //log("servidor dice : " + jsonData);
+                };
+
+                websocket.onerror = function(evt) {
+                    log("ojo!.. error:" + evt.data);
+                };
+
+                function log(mensaje) { //aqui mostrará el LOG de lo que está haciendo el WebSocket
+                    var logDiv = document.getElementById("log");
+                    logDiv.innerHTML += (mensaje + '<br/>');
+                }
+        }
         </script>
     </head>
     <body>
-        <h1>WebSocket</h1>
+        <h1>Truco Argento</h1>
         <form >
-            <label for="mensajeTXT">Mensaje:</label>
-            <input id='mensajeTXT' name='mensajeTXT'/><br/>
-            <button type="button" onclick="enviarMensaje()">Enviar</button>
+            <label >Nombre:</label>
+            <input id='nombre' name='nombre'/>
+            <button type="button" onclick="conectar()">Entrar Juego</button>
         </form>
         <div id="log">
  
