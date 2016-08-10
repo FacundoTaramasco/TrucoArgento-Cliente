@@ -10,18 +10,21 @@
         <script type="text/javascript">
             
             $(document).ready(function(){
-                //$("#areaJuego").hide();
+                $("#areaJuego").hide();
+
+            });
+            
+            function enviarJsonAlServidor(ws, j) {
+                ws.send(JSON.stringify(j));
+                console.log("enviando : " + JSON.stringify(j));
+            }
+            
+            function conectar() {
                 
                 var canvas = document.getElementById("micanvas");
                 var ctx = canvas.getContext("2d");
-                ctx.strokeRect(10,10,50,100);
+                ctx.font = "12px Arial";
                 
-                ctx.strokeRect(70,10,50,100);
-                
-                ctx.strokeRect(130,10,50,100);
-            });
-            
-            function conectar() {
                 $("#formEntrar").hide();
                 var wsUri = "ws://localhost:8080/TrucoArgento-Servidor/TrucoArgento";
 
@@ -33,42 +36,32 @@
                         accion : "entraJuego",
                         nombre : nombre.value
                     };
-                    websocket.send(JSON.stringify(json));
-                    console.log("enviando : " + JSON.stringify(json));
+                    enviarJsonAlServidor(websocket, json);
                 };
 
                 websocket.onmessage = function(event) {
-                    
                     var jsonData = JSON.parse(event.data);
-                    
                     if (jsonData.accion === "espera") {
                         log(jsonData.mensaje);
                     }
-                    
                     if (jsonData.accion === "a_jugar") {
                         //window.location = jsonData.href;
                         var cartas = JSON.parse(jsonData.cartas);
-                        console.log(jsonData);
-                        //console.log(jsonData.cartas);
-                        console.log(cartas[0].palo);
-                        
+                        var x = 10;
+                        for (var i in cartas) {
+                            console.log(cartas[i].palo + " " + cartas[i].valor);
+                            ctx.strokeRect(x, 10, 100, 100);
+                            ctx.fillText(cartas[i].valor + " " + cartas[i].palo, x+5 , 100);
+                            x += 110;
+                        }
                         $("#log").hide();
                         $("#areaJuego").show();
-                        
-                        /*
-                        for (var i in jsonData.cartas) {
-                            
-                            var p = jsonData.cartas[i].palo;
-                            var v = jsonData.cartas[i].valor;
-                            console.log(p + " " + v);
-                        }
-
-                        console.log("Te tocaron estas cartas : " + jsonData.cartas);
-                        */
                     }
                     
                     
-                    //log("servidor dice : " + jsonData);
+                    if (jsonData.accion === "cantoEnvido") {
+                        $("#msjEnvido").text( jsonData.mensaje );
+                    }
                 };
 
                 websocket.onerror = function(evt) {
@@ -79,6 +72,14 @@
                     var logDiv = document.getElementById("log");
                     logDiv.innerHTML += (mensaje + '<br/>');
                 }
+                
+                
+                $("#btnEnvido").click(function() {
+                    var json = {
+                        accion : "cantoEnvido"
+                    };
+                    enviarJsonAlServidor(websocket, json);
+                });
         }
         </script>
     </head>
@@ -98,8 +99,16 @@
             
             <h1> Area juego!</h1>
             
-            <canvas height="300px" width="300px" id="micanvas">
+            <canvas height="200" width="500" id="micanvas">
             Su navegador no soporta en elemento CANVAS</canvas>
+            
+            <div id="msjEnvido"></div>
+            
+            <div id="botoneraInicial">
+                <button id="btnEnvido" type="button">Envido</button>
+                <button id="btnJuega"  type="button">Jugar carta</button>
+                <button id="btnRetira" type="button">Irse al maso</button>
+            </div>
             
         </div>
         
