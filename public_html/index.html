@@ -3,9 +3,26 @@
     <head>
         <title></title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        
+        <script src="./js/jquery-3.1.0.min.js"> </script>
+        
+        
         <script type="text/javascript">
             
+            $(document).ready(function(){
+                //$("#areaJuego").hide();
+                
+                var canvas = document.getElementById("micanvas");
+                var ctx = canvas.getContext("2d");
+                ctx.strokeRect(10,10,50,100);
+                
+                ctx.strokeRect(70,10,50,100);
+                
+                ctx.strokeRect(130,10,50,100);
+            });
+            
             function conectar() {
+                $("#formEntrar").hide();
                 var wsUri = "ws://localhost:8080/TrucoArgento-Servidor/TrucoArgento";
 
                 var websocket = new WebSocket(wsUri);
@@ -17,7 +34,7 @@
                         nombre : nombre.value
                     };
                     websocket.send(JSON.stringify(json));
-                    console.log("enviando : " + json)
+                    console.log("enviando : " + JSON.stringify(json));
                 };
 
                 websocket.onmessage = function(event) {
@@ -30,7 +47,24 @@
                     
                     if (jsonData.accion === "a_jugar") {
                         //window.location = jsonData.href;
+                        var cartas = JSON.parse(jsonData.cartas);
+                        console.log(jsonData);
+                        //console.log(jsonData.cartas);
+                        console.log(cartas[0].palo);
+                        
+                        $("#log").hide();
+                        $("#areaJuego").show();
+                        
+                        /*
+                        for (var i in jsonData.cartas) {
+                            
+                            var p = jsonData.cartas[i].palo;
+                            var v = jsonData.cartas[i].valor;
+                            console.log(p + " " + v);
+                        }
+
                         console.log("Te tocaron estas cartas : " + jsonData.cartas);
+                        */
                     }
                     
                     
@@ -50,13 +84,25 @@
     </head>
     <body>
         <h1>Truco Argento</h1>
-        <form >
+        <form id="formEntrar">
             <label >Nombre:</label>
             <input id='nombre' name='nombre'/>
             <button type="button" onclick="conectar()">Entrar Juego</button>
         </form>
+        
         <div id="log">
  
         </div>
+        
+        <div id="areaJuego">
+            
+            <h1> Area juego!</h1>
+            
+            <canvas height="300px" width="300px" id="micanvas">
+            Su navegador no soporta en elemento CANVAS</canvas>
+            
+        </div>
+        
+        
     </body>
 </html>
