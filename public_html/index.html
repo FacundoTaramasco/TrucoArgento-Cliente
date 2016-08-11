@@ -11,6 +11,8 @@
             
             $(document).ready(function(){
                 $("#areaJuego").hide();
+                
+               
 
             });
             
@@ -56,13 +58,22 @@
                             ctx.fillText(cartas[i].valor + " " + cartas[i].palo, x+5 , 100);
                             x += 110;
                         }
+                        
                         $("#log").hide();
                         $("#areaJuego").show();
+                        $("#botoneraEnvido").hide();
+                        
+                        if (jsonData.tuTurno) {
+                            alert("Es tu turno!");
+                        }
                     }
                     
                     
                     if (jsonData.accion === "cantoEnvido") {
                         $("#msjEnvido").text( jsonData.mensaje );
+                        $("#botoneraInicial").hide();
+                        $("#botoneraEnvido").show();
+                        
                     }
                 };
 
@@ -111,6 +122,13 @@
                 <button id="btnJuega"  type="button">Jugar carta</button>
                 <button id="btnRetira" type="button">Irse al maso</button>
             </div>
+            
+            <br>
+            <div id="botoneraEnvido">
+                <button id="btnAceptarEnvido" type="button">Aceptar Envido</button>
+                <button id="btnRechazarEnvido" type="button">Rechazar Envido</button>
+            </div>
+            
             
         </div>
         
