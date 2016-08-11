@@ -60,14 +60,18 @@
                         }
                         
                         $("#log").hide();
+                        $("#nombreJugador").html("Tu nombre : <b>" + jsonData.nombreJugador + "</b>");
+                        $("#msjGenerales").text("Es el turno de : " + jsonData.nombreTurno);
                         $("#areaJuego").show();
                         $("#botoneraEnvido").hide();
                         
-                        if (jsonData.tuTurno) {
-                            alert("Es tu turno!");
+                        if (!jsonData.tuTurno) {
+                            $('#btnEnvido').prop('disabled', true);
+                            $('#btnJuega').prop('disabled', true);
+                            console.log("no es tu turno!");
                         }
+
                     }
-                    
                     
                     if (jsonData.accion === "cantoEnvido") {
                         $("#msjEnvido").text( jsonData.mensaje );
@@ -115,6 +119,8 @@
             <canvas height="200" width="500" id="micanvas">
             Su navegador no soporta en elemento CANVAS</canvas>
             
+            <div id="nombreJugador"> </div>
+            <div id="msjGenerales"></div>
             <div id="msjEnvido"></div>
             
             <div id="botoneraInicial">
