@@ -22,10 +22,9 @@
             }
             
             function conectar() {
-                
                 var canvas = document.getElementById("micanvas");
-                var ctx = canvas.getContext("2d");
-                ctx.font = "12px Arial";
+                var ctx    = canvas.getContext("2d");
+                ctx.font   = "12px Arial";
                 
                 $("#formEntrar").hide();
                 var wsUri = "ws://localhost:8080/TrucoArgento-Servidor/TrucoArgento";
@@ -61,23 +60,26 @@
                         
                         $("#log").hide();
                         $("#nombreJugador").html("Tu nombre : <b>" + jsonData.nombreJugador + "</b>");
-                        $("#msjGenerales").text("Es el turno de : " + jsonData.nombreTurno);
+                        $("#msjTurno").text("Es el turno de : " + jsonData.nombreTurno);
                         $("#areaJuego").show();
                         $("#botoneraEnvido").hide();
                         
                         if (!jsonData.tuTurno) {
                             $('#btnEnvido').prop('disabled', true);
                             $('#btnJuega').prop('disabled', true);
-                            console.log("no es tu turno!");
+                            //console.log("No es tu turno")
                         }
-
                     }
                     
                     if (jsonData.accion === "cantoEnvido") {
-                        $("#msjEnvido").text( jsonData.mensaje );
+                        $("#msjEnvido").text( jsonData.mensaje);
+                        $("#msjTurno").text("Es el turno de : " + jsonData.nombreTurno);
                         $("#botoneraInicial").hide();
-                        $("#botoneraEnvido").show();
-                        
+                        $("#botoneraEnvido").show();   
+                    }
+                    
+                    if (jsonData.accion === "determinarEnvido") {
+                        $("#msjEnvido").text("Resultado envido: " + jsonData.resultado);
                     }
                 };
 
@@ -92,10 +94,20 @@
                 
                 
                 $("#btnEnvido").click(function() {
-                    var json = {
-                        accion : "cantoEnvido"
-                    };
+                    var json = { accion : "cantoEnvido" };
+                    $('#btnEnvido').prop('disabled', true);
+                    $('#btnJuega').prop('disabled', true);
+                    $("#msjGenerales").text("Esperando respuesta de jugador...");
                     enviarJsonAlServidor(websocket, json);
+                });
+                
+                $("#btnAceptarEnvido").click(function() {
+                    var json = { accion : "envidoAceptado" };
+                    enviarJsonAlServidor(websocket, json);
+                });
+                
+                $("#btnRechazarEnvido").click(function() {
+                    
                 });
         }
         </script>
@@ -111,22 +123,23 @@
         <div id="log">
  
         </div>
-        
+
         <div id="areaJuego">
             
             <h1> Area juego!</h1>
             
+            <div id="nombreJugador"> </div>
+            
             <canvas height="200" width="500" id="micanvas">
             Su navegador no soporta en elemento CANVAS</canvas>
             
-            <div id="nombreJugador"> </div>
+            <div id="msjTurno"></div>
             <div id="msjGenerales"></div>
             <div id="msjEnvido"></div>
             
             <div id="botoneraInicial">
                 <button id="btnEnvido" type="button">Envido</button>
                 <button id="btnJuega"  type="button">Jugar carta</button>
-                <button id="btnRetira" type="button">Irse al maso</button>
             </div>
             
             <br>
@@ -135,6 +148,7 @@
                 <button id="btnRechazarEnvido" type="button">Rechazar Envido</button>
             </div>
             
+            <button id="btnRetira" type="button">Irse al maso</button>
             
         </div>
         
