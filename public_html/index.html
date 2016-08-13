@@ -27,7 +27,7 @@
                 ctx.font   = "12px Arial";
                 
                 $("#formEntrar").hide();
-                var wsUri = "ws://localhost:8080/TrucoArgento-Servidor/TrucoArgento";
+                var wsUri = "ws://localhost:8081/TrucoArgento-Servidor/TrucoArgento";
 
                 var websocket = new WebSocket(wsUri);
 
@@ -46,6 +46,7 @@
                         log(jsonData.mensaje);
                     }
                     if (jsonData.accion === "a_jugar") {
+                        console.log("Recibiendo json :" + jsonData);
                         //window.location = jsonData.href;
                         var cartas = JSON.parse(jsonData.cartas);
                         var x = 10;
@@ -59,7 +60,7 @@
                         }
                         
                         $("#log").hide();
-                        $("#nombreJugador").html("Tu nombre : <b>" + jsonData.nombreJugador + "</b>");
+                        $("#nombreJugador").text("Tu nombre : " + jsonData.nombreJugador);
                         $("#msjTurno").text("Es el turno de : " + jsonData.nombreTurno);
                         $("#areaJuego").show();
                         $("#botoneraEnvido").hide();
