@@ -9,15 +9,24 @@
         
         <script type="text/javascript">
             
+            var websocket;
+            
+            window.onunload = function () {
+                console.log("relog pagina");
+                if (typeof websocket !== 'undefined') {
+                    websocket.onclose = function () {}; // disable onclose handler first
+                    console.log("websocket cerrado");
+                     websocket.close();
+                }
+            };
+
             $(document).ready(function(){
-                $("#areaJuego").hide();
-                
-               
+               $("#areaJuego").hide();
 
             });
             
-            function enviarJsonAlServidor(ws, j) {
-                ws.send(JSON.stringify(j));
+            function enviarJsonAlServidor(j) {
+                websocket.send(JSON.stringify(j));
                 console.log("enviando : " + JSON.stringify(j));
             }
             
@@ -26,10 +35,11 @@
                 var ctx    = canvas.getContext("2d");
                 ctx.font   = "12px Arial";
                 
-                $("#formEntrar").hide();
+                //$("#formEntrar").hide();
+                
                 var wsUri = "ws://localhost:8081/TrucoArgento-Servidor/TrucoArgento";
 
-                var websocket = new WebSocket(wsUri);
+                websocket = new WebSocket(wsUri);
 
                 websocket.onopen = function(evt) {
                     log("Conectado...");
@@ -37,7 +47,7 @@
                         accion : "entraJuego",
                         nombre : nombre.value
                     };
-                    enviarJsonAlServidor(websocket, json);
+                    enviarJsonAlServidor(json);
                 };
 
                 websocket.onmessage = function(event) {
@@ -46,7 +56,7 @@
                         log(jsonData.mensaje);
                     }
                     if (jsonData.accion === "a_jugar") {
-                        console.log("Recibiendo json :" + jsonData);
+                        console.log("Recibiendo json :" + event.data);
                         //window.location = jsonData.href;
                         var cartas = JSON.parse(jsonData.cartas);
                         var x = 10;
@@ -64,12 +74,13 @@
                         $("#msjTurno").text("Es el turno de : " + jsonData.nombreTurno);
                         $("#areaJuego").show();
                         $("#botoneraEnvido").hide();
-                        
+
                         if (!jsonData.tuTurno) {
                             $('#btnEnvido').prop('disabled', true);
                             $('#btnJuega').prop('disabled', true);
-                            //console.log("No es tu turno")
+                            console.log("No es tu turno");
                         }
+
                     }
                     
                     if (jsonData.accion === "cantoEnvido") {
@@ -99,17 +110,21 @@
                     $('#btnEnvido').prop('disabled', true);
                     $('#btnJuega').prop('disabled', true);
                     $("#msjGenerales").text("Esperando respuesta de jugador...");
-                    enviarJsonAlServidor(websocket, json);
+                    enviarJsonAlServidor(json);
                 });
                 
                 $("#btnAceptarEnvido").click(function() {
                     var json = { accion : "envidoAceptado" };
-                    enviarJsonAlServidor(websocket, json);
+                    enviarJsonAlServidor(json);
                 });
                 
                 $("#btnRechazarEnvido").click(function() {
                     
                 });
+                
+                
+                
+
         }
         </script>
     </head>
