@@ -39,30 +39,28 @@
                     var jsonData = JSON.parse(event.data);
                     if (jsonData.accion === "espera") {
                         log(jsonData.mensaje);
+                        
                     }
                     if (jsonData.accion === "a_jugar") {
-                        iniciarMano(jsonData);
-                                                
                         $("#formEntrar").hide();
-                        $("#nombreJugador").text("Tu nombre : " + jsonData.nombreJugador);
-                        $("#msjTurno").text("Es el turno de : " + jsonData.nombreTurno);
                         $("#areaJuego").show();
-                        $("#botoneraEnvido").hide();
-
-                        if (!jsonData.tuTurno) {
-                            $('#btnEnvido').prop('disabled', true);
-                            $('#btnJuega').prop('disabled', true);
-                            console.log("No es tu turno");
-                        }
+                        $("#nombreJugador").text("Tu nombre : " + jsonData.nombreJugador);
+                        iniciarMano(jsonData);
                     }
                     
+                    if (jsonData.accion === "iniciaMano") {
+                        iniciarMano(jsonData);
+                    }
+                    
+                    if (jsonData.accion === "cambioTurno") {
+                        $("#msjTurno").text("Es el turno de : " + jsonData.nombreTurno);
+                    }
                     if (jsonData.accion === "cantoEnvido") {
                         $("#msjEnvido").text( jsonData.mensaje);
-                        $("#msjTurno").text("Es el turno de : " + jsonData.nombreTurno);
                         $("#botoneraInicial").hide();
                         $("#botoneraEnvido").show();   
                     }
-                    
+
                     if (jsonData.accion === "determinarEnvido") {
                         $("#msjEnvido").text("Resultado envido: " + jsonData.resultado);
                     }
@@ -93,6 +91,16 @@
                         ctx.fillText(cartas[i].valor + " " + cartas[i].palo, x+5 , 100);
                         x += 110;
                     }
+                    
+                    $("#msjEnvido").text("");
+                    $("#msjGenerales").text("");
+                    $("#botoneraEnvido").hide();
+                    $("#botoneraInicial").show();
+                    
+                    $("#msjTurno").text("Es el turno de : " + jsonData.nombreTurno);
+
+                    $('#btnEnvido').prop('disabled', !jsonData.tuTurno);
+                    $('#btnJuega').prop('disabled', !jsonData.tuTurno);
                 }
                 
                 $("#btnEnvido").click(function() {
