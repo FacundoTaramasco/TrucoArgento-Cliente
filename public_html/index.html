@@ -9,7 +9,7 @@
         
         <script type="text/javascript">
             
-            $(document).ready(function(){
+            $(document).ready(function() {
                    $("#areaJuego").hide();
              });
              
@@ -55,6 +55,7 @@
                     if (jsonData.accion === "cambioTurno") {
                         $("#msjTurno").text("Es el turno de : " + jsonData.nombreTurno);
                     }
+
                     if (jsonData.accion === "cantoEnvido") {
                         $("#msjEnvido").text( jsonData.mensaje);
                         $("#botoneraInicial").hide();
@@ -107,7 +108,7 @@
                     var json = { accion : "cantoEnvido" };
                     $('#btnEnvido').prop('disabled', true);
                     $('#btnJuega').prop('disabled', true);
-                    $("#msjGenerales").text("Esperando respuesta de jugador...");
+                    $("#msjEnvido").text("Esperando respuesta de jugador...");
                     enviarJsonAlServidor(json);
                 });
                 
