@@ -9,35 +9,18 @@
         
         <script type="text/javascript">
             
-            var websocket;
-            
-            window.onunload = function () {
-                console.log("relog pagina");
-                if (typeof websocket !== 'undefined') {
-                    websocket.onclose = function () {}; // disable onclose handler first
-                    console.log("websocket cerrado");
-                     websocket.close();
-                }
-            };
-
             $(document).ready(function(){
-               $("#areaJuego").hide();
-
-            });
-            
-            function enviarJsonAlServidor(j) {
-                websocket.send(JSON.stringify(j));
-                console.log("enviando : " + JSON.stringify(j));
-            }
+                   $("#areaJuego").hide();
+             });
+             
+            var websocket;
             
             function conectar() {
                 var canvas = document.getElementById("micanvas");
                 var ctx    = canvas.getContext("2d");
                 ctx.font   = "12px Arial";
-                
-                //$("#formEntrar").hide();
-                
-                var wsUri = "ws://localhost:8081/TrucoArgento-Servidor/TrucoArgento";
+
+                var wsUri = "ws://localhost:8080/TrucoArgento-Servidor/TrucoArgento";
 
                 websocket = new WebSocket(wsUri);
 
@@ -51,25 +34,16 @@
                 };
 
                 websocket.onmessage = function(event) {
+                    console.log("Recibiendo :" + event.data);
+                    
                     var jsonData = JSON.parse(event.data);
                     if (jsonData.accion === "espera") {
                         log(jsonData.mensaje);
                     }
                     if (jsonData.accion === "a_jugar") {
-                        console.log("Recibiendo json :" + event.data);
-                        //window.location = jsonData.href;
-                        var cartas = JSON.parse(jsonData.cartas);
-                        var x = 10;
-                        
-                        ctx.clearRect(0, 0, canvas.width, canvas.height);
-                        for (var i in cartas) {
-                            console.log(cartas[i].palo + " " + cartas[i].valor);
-                            ctx.strokeRect(x, 10, 100, 100);
-                            ctx.fillText(cartas[i].valor + " " + cartas[i].palo, x+5 , 100);
-                            x += 110;
-                        }
-                        
-                        $("#log").hide();
+                        iniciarMano(jsonData);
+                                                
+                        $("#formEntrar").hide();
                         $("#nombreJugador").text("Tu nombre : " + jsonData.nombreJugador);
                         $("#msjTurno").text("Es el turno de : " + jsonData.nombreTurno);
                         $("#areaJuego").show();
@@ -80,7 +54,6 @@
                             $('#btnJuega').prop('disabled', true);
                             console.log("No es tu turno");
                         }
-
                     }
                     
                     if (jsonData.accion === "cantoEnvido") {
@@ -93,6 +66,10 @@
                     if (jsonData.accion === "determinarEnvido") {
                         $("#msjEnvido").text("Resultado envido: " + jsonData.resultado);
                     }
+                    
+                    if (jsonData.accion === "relog") {
+                        location.reload();
+                    }
                 };
 
                 websocket.onerror = function(evt) {
@@ -104,6 +81,19 @@
                     logDiv.innerHTML += (mensaje + '<br/>');
                 }
                 
+                function iniciarMano(jsonData) {
+                    //window.location = jsonData.href;
+                    var cartas = JSON.parse(jsonData.cartas);
+                    var x = 10;
+
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    for (var i in cartas) {
+                        console.log(cartas[i].palo + " " + cartas[i].valor);
+                        ctx.strokeRect(x, 10, 100, 100);
+                        ctx.fillText(cartas[i].valor + " " + cartas[i].palo, x+5 , 100);
+                        x += 110;
+                    }
+                }
                 
                 $("#btnEnvido").click(function() {
                     var json = { accion : "cantoEnvido" };
@@ -121,9 +111,28 @@
                 $("#btnRechazarEnvido").click(function() {
                     
                 });
+
+                $("#btnRetira").click(function() {
+                    var json = { accion : "irseMazo" };
+                    enviarJsonAlServidor(json);
+                });
                 
-                
-                
+
+
+                window.onunload = function () {
+                    console.log("relog pagina");
+                    if (typeof websocket !== 'undefined') {
+                        websocket.onclose = function () {}; // disable onclose handler first
+                        console.log("websocket cerrado");
+                         websocket.close();
+                    }
+                };
+
+                function enviarJsonAlServidor(j) {
+                    websocket.send(JSON.stringify(j));
+                    console.log("enviando : " + JSON.stringify(j));
+                }
+
 
         }
         </script>
@@ -134,11 +143,11 @@
             <label >Nombre:</label>
             <input id='nombre' name='nombre'/>
             <button type="button" onclick="conectar()">Entrar Juego</button>
+            <br>
+            <div id="log"> </div>
         </form>
         
-        <div id="log">
- 
-        </div>
+        
 
         <div id="areaJuego">
             
@@ -147,7 +156,7 @@
             <div id="nombreJugador"> </div>
             
             <canvas height="200" width="500" id="micanvas">
-            Su navegador no soporta en elemento CANVAS</canvas>
+            Su navegador no soporta el elemento CANVAS</canvas>
             
             <div id="msjTurno"></div>
             <div id="msjGenerales"></div>
@@ -164,7 +173,7 @@
                 <button id="btnRechazarEnvido" type="button">Rechazar Envido</button>
             </div>
             
-            <button id="btnRetira" type="button">Irse al maso</button>
+            <button id="btnRetira" type="button">Irse al mazo</button>
             
         </div>
         
