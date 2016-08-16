@@ -3,9 +3,7 @@
     <head>
         <title></title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        
         <script src="./js/jquery-3.1.0.min.js"> </script>
-        
         
         <script type="text/javascript">
             
@@ -25,7 +23,6 @@
                 websocket = new WebSocket(wsUri);
 
                 websocket.onopen = function(evt) {
-                    log("Conectado...");
                     var json = {
                         accion : "entraJuego",
                         nombre : nombre.value
@@ -38,9 +35,9 @@
                     
                     var jsonData = JSON.parse(event.data);
                     if (jsonData.accion === "espera") {
-                        log(jsonData.mensaje);
-                        
+                        $("#log").text(jsonData.mensaje);   
                     }
+
                     if (jsonData.accion === "a_jugar") {
                         $("#formEntrar").hide();
                         $("#areaJuego").show();
@@ -58,8 +55,15 @@
 
                     if (jsonData.accion === "cantoEnvido") {
                         $("#msjEnvido").text( jsonData.mensaje);
-                        $("#botoneraInicial").hide();
-                        $("#botoneraEnvido").show();   
+                        //$("#botoneraInicial").hide();
+                        $("#botoneraEnvido").show();
+
+                        $('#btnEnvidoEnvido').prop('disabled', false);
+                        $('#btnRealEnvido').prop('disabled', false);
+                        $('#btnFaltaEnvido').prop('disabled', false);
+                    
+                        $("#btnEnvido").hide();
+                        $("#botoneraAceptarRechazar").show();
                     }
 
                     if (jsonData.accion === "determinarEnvido") {
@@ -72,16 +76,11 @@
                 };
 
                 websocket.onerror = function(evt) {
-                    log("ojo!.. error:" + evt.data);
+                    $("#log").text("Error:" + evt.data);
                 };
 
-                function log(mensaje) { //aqui mostrará el LOG de lo que está haciendo el WebSocket
-                    var logDiv = document.getElementById("log");
-                    logDiv.innerHTML += (mensaje + '<br/>');
-                }
                 
                 function iniciarMano(jsonData) {
-                    //window.location = jsonData.href;
                     var cartas = JSON.parse(jsonData.cartas);
                     var x = 10;
 
@@ -94,19 +93,26 @@
                     }
                     
                     $("#msjEnvido").text("");
-                    $("#msjGenerales").text("");
-                    $("#botoneraEnvido").hide();
-                    $("#botoneraInicial").show();
+                    
+                    if (jsonData.tuTurno) $("#botoneraEnvido").show();
+                    else $("#botoneraEnvido").hide();
+                    $("#botoneraAceptarRechazar").hide();
                     
                     $("#msjTurno").text("Es el turno de : " + jsonData.nombreTurno);
 
                     $('#btnEnvido').prop('disabled', !jsonData.tuTurno);
+                    $('#btnEnvidoEnvido').prop('disabled', !jsonData.tuTurno);
+                    $('#btnRealEnvido').prop('disabled', !jsonData.tuTurno);
+                    $('#btnFaltaEnvido').prop('disabled', !jsonData.tuTurno);
                     $('#btnJuega').prop('disabled', !jsonData.tuTurno);
                 }
                 
                 $("#btnEnvido").click(function() {
                     var json = { accion : "cantoEnvido" };
                     $('#btnEnvido').prop('disabled', true);
+                    $('#btnEnvidoEnvido').prop('disabled', true);
+                    $('#btnRealEnvido').prop('disabled', true);
+                    $('#btnFaltaEnvido').prop('disabled', true);
                     $('#btnJuega').prop('disabled', true);
                     $("#msjEnvido").text("Esperando respuesta de jugador...");
                     enviarJsonAlServidor(json);
@@ -126,8 +132,6 @@
                     enviarJsonAlServidor(json);
                 });
                 
-
-
                 window.onunload = function () {
                     console.log("relog pagina");
                     if (typeof websocket !== 'undefined') {
@@ -141,8 +145,6 @@
                     websocket.send(JSON.stringify(j));
                     console.log("enviando : " + JSON.stringify(j));
                 }
-
-
         }
         </script>
     </head>
@@ -156,32 +158,34 @@
             <div id="log"> </div>
         </form>
         
-        
 
         <div id="areaJuego">
             
             <h1> Area juego!</h1>
             
             <div id="nombreJugador"> </div>
-            
+
             <canvas height="200" width="500" id="micanvas">
             Su navegador no soporta el elemento CANVAS</canvas>
             
             <div id="msjTurno"></div>
-            <div id="msjGenerales"></div>
             <div id="msjEnvido"></div>
             
-            <div id="botoneraInicial">
+            <div id="botoneraEnvido">
                 <button id="btnEnvido" type="button">Envido</button>
-                <button id="btnJuega"  type="button">Jugar carta</button>
+                <button id="btnEnvidoEnvido" type="button">Envido Envido</button>
+                <button id="btnRealEnvido" type="button">Real Envido</button>
+                <button id="btnFaltaEnvido" type="button">Falta Envido</button>
+                
             </div>
             
             <br>
-            <div id="botoneraEnvido">
+            <div id="botoneraAceptarRechazar">
                 <button id="btnAceptarEnvido" type="button">Aceptar Envido</button>
                 <button id="btnRechazarEnvido" type="button">Rechazar Envido</button>
             </div>
             
+            <button id="btnJuega"  type="button">Jugar carta</button>
             <button id="btnRetira" type="button">Irse al mazo</button>
             
         </div>
