@@ -17,7 +17,7 @@
                 var canvas = document.getElementById("micanvas");
                 var ctx    = canvas.getContext("2d");
                 ctx.font   = "12px Arial";
-
+                var turno  = false;
                 var wsUri = "ws://localhost:8080/TrucoArgento-Servidor/TrucoArgento";
 
                 websocket = new WebSocket(wsUri);
@@ -31,7 +31,7 @@
                 };
 
                 websocket.onmessage = function(event) {
-                    console.log("Recibiendo :" + event.data);
+                    console.log("RECIBIENDO :" + event.data);
                     
                     var jsonData = JSON.parse(event.data);
                     if (jsonData.accion === "espera") {
@@ -58,11 +58,11 @@
                         //$("#botoneraInicial").hide();
                         $("#botoneraEnvido").show();
 
-                        $('#btnEnvidoEnvido').prop('disabled', false);
-                        $('#btnRealEnvido').prop('disabled', false);
-                        $('#btnFaltaEnvido').prop('disabled', false);
+                        //$('#btnEnvidoEnvido').prop('disabled', false);
+                        //$('#btnRealEnvido').prop('disabled', false);
+                        //$('#btnFaltaEnvido').prop('disabled', false);
                     
-                        $("#btnEnvido").hide();
+                        //$("#btnEnvido").hide();
                         $("#botoneraAceptarRechazar").show();
                     }
 
@@ -94,21 +94,31 @@
                     
                     $("#msjEnvido").text("");
                     
-                    if (jsonData.tuTurno) $("#botoneraEnvido").show();
-                    else $("#botoneraEnvido").hide();
+                    
+                    turno = jsonData.tuTurno;
+                    
+                    if (turno) {
+                        $("#botoneraEnvido").show();
+                        //$("#btnEnvidoEnvido").prop("disabled", true);
+                    }
+                    else
+                        $("#botoneraEnvido").hide();
+                    
                     $("#botoneraAceptarRechazar").hide();
                     
                     $("#msjTurno").text("Es el turno de : " + jsonData.nombreTurno);
 
-                    $('#btnEnvido').prop('disabled', !jsonData.tuTurno);
-                    $('#btnEnvidoEnvido').prop('disabled', !jsonData.tuTurno);
-                    $('#btnRealEnvido').prop('disabled', !jsonData.tuTurno);
-                    $('#btnFaltaEnvido').prop('disabled', !jsonData.tuTurno);
-                    $('#btnJuega').prop('disabled', !jsonData.tuTurno);
+                    /*
+                    $('#btnEnvido').prop('disabled',       !jsonData.tuTurno);
+                    $('#btnRealEnvido').prop('disabled',   !jsonData.tuTurno);
+                    $('#btnFaltaEnvido').prop('disabled',  !jsonData.tuTurno);
+                    $('#btnJuega').prop('disabled',        !jsonData.tuTurno);
+                    */
                 }
                 
                 $("#btnEnvido").click(function() {
-                    var json = { accion : "cantoEnvido" };
+                    if (!turno) { return; }
+                    var json = { accion : "cantoEnvido", tipo : "1" };
                     $('#btnEnvido').prop('disabled', true);
                     $('#btnEnvidoEnvido').prop('disabled', true);
                     $('#btnRealEnvido').prop('disabled', true);
@@ -143,7 +153,7 @@
 
                 function enviarJsonAlServidor(j) {
                     websocket.send(JSON.stringify(j));
-                    console.log("enviando : " + JSON.stringify(j));
+                    console.log("ENVIANDO : " + JSON.stringify(j));
                 }
         }
         </script>
