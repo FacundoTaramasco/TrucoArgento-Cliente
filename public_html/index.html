@@ -51,18 +51,25 @@
                     
                     if (jsonData.accion === "cambioTurno") {
                         $("#msjTurno").text("Es el turno de : " + jsonData.nombreTurno);
+                        turno = jsonData.tuTurno;
                     }
 
+                    if (jsonData.accion === "infoEnvido") {
+                        $("#msjEnvido").text(jsonData.mensaje);
+                        //alert(jsonData.mensaje);
+                    }
+                    
+                    if (jsonData.accion === "logEnvido") {
+                        $("#logEnvido").append("<p>" + jsonData.mensaje + "</p>");
+                    }
+
+                    if (jsonData.accion === "errorEnvido") {
+                        alert(jsonData.mensaje);
+                    }
+                    
                     if (jsonData.accion === "cantoEnvido") {
                         $("#msjEnvido").text( jsonData.mensaje);
-                        //$("#botoneraInicial").hide();
                         $("#botoneraEnvido").show();
-
-                        //$('#btnEnvidoEnvido').prop('disabled', false);
-                        //$('#btnRealEnvido').prop('disabled', false);
-                        //$('#btnFaltaEnvido').prop('disabled', false);
-                    
-                        //$("#btnEnvido").hide();
                         $("#botoneraAceptarRechazar").show();
                     }
 
@@ -83,7 +90,6 @@
                 function iniciarMano(jsonData) {
                     var cartas = JSON.parse(jsonData.cartas);
                     var x = 10;
-
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
                     for (var i in cartas) {
                         console.log(cartas[i].palo + " " + cartas[i].valor);
@@ -91,42 +97,30 @@
                         ctx.fillText(cartas[i].valor + " " + cartas[i].palo, x+5 , 100);
                         x += 110;
                     }
-                    
                     $("#msjEnvido").text("");
-                    
-                    
                     turno = jsonData.tuTurno;
-                    
-                    if (turno) {
-                        $("#botoneraEnvido").show();
-                        //$("#btnEnvidoEnvido").prop("disabled", true);
-                    }
-                    else
-                        $("#botoneraEnvido").hide();
-                    
                     $("#botoneraAceptarRechazar").hide();
-                    
                     $("#msjTurno").text("Es el turno de : " + jsonData.nombreTurno);
-
-                    /*
-                    $('#btnEnvido').prop('disabled',       !jsonData.tuTurno);
-                    $('#btnRealEnvido').prop('disabled',   !jsonData.tuTurno);
-                    $('#btnFaltaEnvido').prop('disabled',  !jsonData.tuTurno);
-                    $('#btnJuega').prop('disabled',        !jsonData.tuTurno);
-                    */
                 }
                 
                 $("#btnEnvido").click(function() {
-                    if (!turno) { return; }
+                    if (!turno) { alert("No es tu turno."); return; }                    
                     var json = { accion : "cantoEnvido", tipo : "1" };
-                    $('#btnEnvido').prop('disabled', true);
-                    $('#btnEnvidoEnvido').prop('disabled', true);
-                    $('#btnRealEnvido').prop('disabled', true);
-                    $('#btnFaltaEnvido').prop('disabled', true);
-                    $('#btnJuega').prop('disabled', true);
-                    $("#msjEnvido").text("Esperando respuesta de jugador...");
                     enviarJsonAlServidor(json);
                 });
+                
+                $("#btnEnvidoEnvido").click(function() {
+                    if (!turno) { alert("No es tu turno."); return; }
+                    var json = { accion : "cantoEnvido", tipo : "2" };
+                    enviarJsonAlServidor(json);
+                });
+                
+                $("#btnRealEnvido").click(function() {
+                    if (!turno) { alert("No es tu turno."); return; }
+                    var json = { accion : "cantoEnvido", tipo : "3" };
+                    enviarJsonAlServidor(json);
+                });
+                
                 
                 $("#btnAceptarEnvido").click(function() {
                     var json = { accion : "envidoAceptado" };
@@ -179,6 +173,7 @@
             Su navegador no soporta el elemento CANVAS</canvas>
             
             <div id="msjTurno"></div>
+            
             <div id="msjEnvido"></div>
             
             <div id="botoneraEnvido">
@@ -197,6 +192,11 @@
             
             <button id="btnJuega"  type="button">Jugar carta</button>
             <button id="btnRetira" type="button">Irse al mazo</button>
+            
+            
+            <br>
+            
+            <div id="logEnvido"></div>
             
         </div>
         
